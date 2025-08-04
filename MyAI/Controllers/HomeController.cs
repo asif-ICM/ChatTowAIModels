@@ -107,7 +107,8 @@ namespace MyAI.Controllers
                 credential: new ApiKeyCredential(_apiKey),
                 options: new OpenAIClientOptions
                 {
-                    Endpoint = new Uri("https://api.groq.com/openai/v1")
+                    Endpoint = new Uri("https://api.groq.com/openai/v1"),
+                    
                 }
                 );
             var messages = new ChatMessage[]
@@ -115,8 +116,12 @@ namespace MyAI.Controllers
                 new SystemChatMessage(system),
                 new UserChatMessage(question)
             };
+            var options = new ChatCompletionOptions
+            {
+                //Tools = { locTool, weatherTool }  // <- tools go here
+            };
 
-            var reply = await client.CompleteChatAsync(messages);
+            var reply = await client.CompleteChatAsync(messages, options);
             var anser = reply.Value.Content[0].Text;
             return anser;
         }
