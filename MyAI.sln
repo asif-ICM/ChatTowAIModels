@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36301.6 d17.14
+VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyAI", "MyAI\MyAI.csproj", "{3AB505DA-9BFE-476A-B0AD-F00022A77E57}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AI", "AI\AI.csproj", "{8C6A2A65-E440-4AE9-915B-0A8516C27CEE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Util", "Util\Util.csproj", "{6136909B-28F5-4088-984F-FD165E3FF54E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{3AB505DA-9BFE-476A-B0AD-F00022A77E57}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3AB505DA-9BFE-476A-B0AD-F00022A77E57}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3AB505DA-9BFE-476A-B0AD-F00022A77E57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C6A2A65-E440-4AE9-915B-0A8516C27CEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C6A2A65-E440-4AE9-915B-0A8516C27CEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C6A2A65-E440-4AE9-915B-0A8516C27CEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C6A2A65-E440-4AE9-915B-0A8516C27CEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6136909B-28F5-4088-984F-FD165E3FF54E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6136909B-28F5-4088-984F-FD165E3FF54E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6136909B-28F5-4088-984F-FD165E3FF54E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6136909B-28F5-4088-984F-FD165E3FF54E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
