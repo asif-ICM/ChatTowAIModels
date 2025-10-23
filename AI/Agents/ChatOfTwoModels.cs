@@ -17,7 +17,7 @@ namespace AI.Agents
         internal async Task<List<MyChatMessage>> ModelsAsync(string question)
         {
             List<MyChatMessage> _chatHistory = new List<MyChatMessage>();
-            string user = "gemma2-9b-it";
+            string user = "llama-3.3-70b-versatile";
             string userSystemRole = "You will pretend to be a human and ask the query in a conversational way.";
             string agent = "llama-3.3-70b-versatile";
             string agentSystemRole = @"You are an AI system. Do NOT simulate being a human or use conversational language.

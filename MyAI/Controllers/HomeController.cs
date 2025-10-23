@@ -19,7 +19,7 @@ namespace MyAI.Controllers
         public HomeController(ILogger<HomeController> logger, IConfiguration config)
         {
             _logger = logger;
-            _apiKey = config["GROQ_API_KEY"]; // reads from env vars
+            _apiKey = config["GROQ_API_KEY"] ?? throw new InvalidOperationException("GROQ_API_KEY not found in configuration"); // reads from env vars
         }
 
         public IActionResult Index()
@@ -71,6 +71,11 @@ namespace MyAI.Controllers
             var _chatHistory= await new OffensiveWordService(_apiKey).Agent(question);
           
             return View(_chatHistory);
+        }
+
+        public IActionResult ChatBot()
+        {
+            return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
