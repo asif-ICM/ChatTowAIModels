@@ -1,0 +1,120 @@
+@{
+    ViewData["Title"] = "Test ChatBot API";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3>ChatBot API Test</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="testMessage" class="form-label">Test Message:</label>
+                        <input type="text" id="testMessage" class="form-control" value="Hello, how are you?" placeholder="Enter test message">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <button id="testChat" class="btn btn-primary me-2">Test Chat</button>
+                        <button id="testStream" class="btn btn-success me-2">Test Stream</button>
+                        <button id="testThink" class="btn btn-warning">Test Think</button>
+                    </div>
+                    
+                    <div id="testResults" class="mt-3">
+                        <h5>Test Results:</h5>
+                        <div id="results" class="border p-3" style="min-height: 200px; background-color: #f8f9fa;">
+                            <em>Click a test button to see results...</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const testMessage = document.getElementById('testMessage');
+    const testChat = document.getElementById('testChat');
+    const testStream = document.getElementById('testStream');
+    const testThink = document.getElementById('testThink');
+    const results = document.getElementById('results');
+
+    function addResult(message, type = 'info') {
+        const div = document.createElement('div');
+        div.className = `alert alert-${type} mb-2`;
+        div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+        results.appendChild(div);
+        results.scrollTop = results.scrollHeight;
+    }
+
+    testChat.addEventListener('click', async () => {
+        const message = testMessage.value.trim();
+        if (!message) return;
+
+        addResult('Testing Chat endpoint...', 'info');
+        
+        try {
+            const response = await fetch('/api/ChatBot/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                addResult(`Chat endpoint working! Response: ${JSON.stringify(data).substring(0, 100)}...`, 'success');
+            } else {
+                addResult(`Chat endpoint error: ${response.status} ${response.statusText}`, 'danger');
+            }
+        } catch (error) {
+            addResult(`Chat endpoint error: ${error.message}`, 'danger');
+        }
+    });
+
+    testStream.addEventListener('click', async () => {
+        const message = testMessage.value.trim();
+        if (!message) return;
+
+        addResult('Testing Stream endpoint...', 'info');
+        
+        try {
+            const response = await fetch('/api/ChatBot/stream', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+
+            if (response.ok) {
+                addResult('Stream endpoint working! (Check browser network tab for streaming data)', 'success');
+            } else {
+                addResult(`Stream endpoint error: ${response.status} ${response.statusText}`, 'danger');
+            }
+        } catch (error) {
+            addResult(`Stream endpoint error: ${error.message}`, 'danger');
+        }
+    });
+
+    testThink.addEventListener('click', async () => {
+        const message = testMessage.value.trim();
+        if (!message) return;
+
+        addResult('Testing Think endpoint...', 'info');
+        
+        try {
+            const response = await fetch('/api/ChatBot/think', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+
+            if (response.ok) {
+                addResult('Think endpoint working! (Check browser network tab for streaming data)', 'success');
+            } else {
+                addResult(`Think endpoint error: ${response.status} ${response.statusText}`, 'danger');
+            }
+        } catch (error) {
+            addResult(`Think endpoint error: ${error.message}`, 'danger');
+        }
+    });
+</script>
