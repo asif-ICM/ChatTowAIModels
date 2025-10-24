@@ -9,10 +9,12 @@ namespace AI.Application
     public class ChatBotThinkingService
     {
         private readonly string _apiKey;
+        private readonly ContentSafetyFilter _safetyFilter;
 
         public ChatBotThinkingService(string apiKey)
         {
             _apiKey = apiKey;
+            _safetyFilter = new ContentSafetyFilter();
         }
 
         public async IAsyncEnumerable<ThinkingStep> ThinkAndRespondAsync(string message)
@@ -25,7 +27,37 @@ namespace AI.Application
             };
             await Task.Delay(1000);
 
-            // Step 2: Show analysis phase
+            // Step 2: Safety check
+            yield return new ThinkingStep
+            {
+                Content = "🛡️ Checking content safety...",
+                Type = "analyzing"
+            };
+            await Task.Delay(500);
+
+            // Check for inappropriate content
+            var safetyResult = _safetyFilter.CheckContentSafety(message);
+            if (!safetyResult.IsSafe)
+            {
+                yield return new ThinkingStep
+                {
+                    Content = "⚠️ I cannot respond to this request as it contains inappropriate content or potential legal risks.",
+                    Type = "safety_warning"
+                };
+                yield return new ThinkingStep
+                {
+                    Content = "Please rephrase your question in a more appropriate way.",
+                    Type = "safety_warning"
+                };
+                yield return new ThinkingStep
+                {
+                    Content = "✅ Safety check complete - Request blocked",
+                    Type = "complete"
+                };
+                yield break;
+            }
+
+            // Step 3: Show analysis phase
             yield return new ThinkingStep
             {
                 Content = "🔍 Analyzing your question...",
@@ -33,7 +65,7 @@ namespace AI.Application
             };
             await Task.Delay(800);
 
-            // Step 3: Show todo/planning phase
+            // Step 4: Show todo/planning phase
             yield return new ThinkingStep
             {
                 Content = "📝 Planning my response...",
@@ -53,7 +85,16 @@ namespace AI.Application
 
             var messages = new ChatMessage[]
             {
-                new SystemChatMessage("You are a helpful AI assistant. Provide clear, detailed, and accurate responses. Think step by step and explain your reasoning."),
+                new SystemChatMessage(@"You are a helpful AI assistant with strict content safety guidelines. 
+                - Provide clear, detailed, and accurate responses
+                - Think step by step and explain your reasoning
+                - NEVER provide content that is:
+                  * Vulgar, offensive, or inappropriate
+                  * Potentially illegal or harmful
+                  * Discriminatory or biased
+                  * Personal information or private data
+                - If a question seems inappropriate, politely decline and suggest an alternative
+                - Always maintain a professional and respectful tone"),
                 new UserChatMessage(message)
             };
 
@@ -67,6 +108,7 @@ namespace AI.Application
             };
             await Task.Delay(300);
 
+            string fullResponse = "";
             await foreach (var update in client.CompleteChatStreamingAsync(messages, options))
             {
                 if (update.ContentUpdate?.Count > 0)
@@ -74,6 +116,25 @@ namespace AI.Application
                     var content = update.ContentUpdate[0].Text;
                     if (!string.IsNullOrEmpty(content))
                     {
+                        fullResponse += content;
+                        
+                        // Check if the accumulated response contains inappropriate content
+                        var responseSafety = _safetyFilter.CheckContentSafety(fullResponse);
+                        if (!responseSafety.IsSafe)
+                        {
+                            yield return new ThinkingStep
+                            {
+                                Content = "⚠️ I cannot continue this response as it may contain inappropriate content.",
+                                Type = "safety_warning"
+                            };
+                            yield return new ThinkingStep
+                            {
+                                Content = "Please rephrase your question in a more appropriate way.",
+                                Type = "safety_warning"
+                            };
+                            yield break;
+                        }
+                        
                         yield return new ThinkingStep
                         {
                             Content = content,

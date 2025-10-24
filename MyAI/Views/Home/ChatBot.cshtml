@@ -170,6 +170,14 @@
         animation: complete-glow 3s ease-in-out;
     }
     
+    .message.safety-warning {
+        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        border-left: 4px solid #dc3545;
+        animation: safety-warning-pulse 2s infinite;
+        color: #721c24;
+        font-weight: 500;
+    }
+    
     @@keyframes thinking-pulse {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.8; }
@@ -188,6 +196,17 @@
     @@keyframes complete-glow {
         0%, 100% { box-shadow: 0 0 0 rgba(23, 162, 184, 0); }
         50% { box-shadow: 0 0 20px rgba(23, 162, 184, 0.5); }
+    }
+    
+    @@keyframes safety-warning-pulse {
+        0%, 100% { 
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+            transform: scale(1);
+        }
+        50% { 
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+            transform: scale(1.02);
+        }
     }
 </style>
 
@@ -410,6 +429,8 @@
                                 if (parsed.content) {
                                     if (parsed.type === 'thinking' || parsed.type === 'analyzing' || parsed.type === 'todo') {
                                         addMessage(parsed.content, false, false, parsed.type);
+                                    } else if (parsed.type === 'safety_warning') {
+                                        addMessage(parsed.content, false, false, 'safety-warning');
                                     } else if (parsed.type === 'response_start') {
                                         addMessage(parsed.content, false, true, 'response-start');
                                         currentStreamingMessage = chatContainer.lastElementChild;
