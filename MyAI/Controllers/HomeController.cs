@@ -5,6 +5,7 @@ using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
@@ -81,6 +82,17 @@ namespace MyAI.Controllers
         public IActionResult TestChatBot()
         {
             return View();
+        }
+
+        public IActionResult AngularJSExample()
+        {
+            // Return the AngularJS example HTML file from wwwroot
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "angularjs-chatbot-example.html");
+            if (System.IO.File.Exists(filePath))
+            {
+                return PhysicalFile(filePath, "text/html");
+            }
+            return NotFound("AngularJS example file not found");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -135,6 +135,102 @@ namespace MyAI.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpPost("html")]
+        public async Task<IActionResult> ChatHtml([FromBody] ChatRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Message))
+            {
+                return BadRequest("Message cannot be empty");
+            }
+
+            try
+            {
+                // Use two-agent flow:
+                // Agent 1: Get response from chatbot (via ChatBotHtmlService)
+                // Agent 2: Format response as HTML with appropriate styling (via HtmlFormattingAgent)
+                var htmlService = new ChatBotHtmlService(_apiKey);
+                var htmlResponse = await htmlService.GetFormattedHtmlResponseAsync(request.Message);
+                
+                // Wrap the HTML response in a complete HTML document with styling
+                var fullHtmlDocument = WrapHtmlResponse(request.Message, htmlResponse);
+                
+                return Content(fullHtmlDocument, "text/html");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in HTML chat");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        private string WrapHtmlResponse(string question, string htmlContent)
+        {
+            // The htmlContent from Agent 2 is already formatted HTML with inline styles
+            // We just need to wrap it in a complete HTML document structure
+            var html = $@"<!DOCTYPE html>
+<html lang=""en"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>ChatBot HTML Response</title>
+    <style>
+        body {{
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }}
+        .container {{
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+        }}
+        .question {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-weight: 600;
+            font-size: 18px;
+        }}
+        .answer-wrapper {{
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }}
+        .timestamp {{
+            font-size: 12px;
+            color: #718096;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            text-align: right;
+        }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""question"">
+            <strong>Question:</strong> {System.Security.SecurityElement.Escape(question)}
+        </div>
+        <div class=""answer-wrapper"">
+            {htmlContent}
+            <div class=""timestamp"">Generated at {DateTime.Now:yyyy-MM-dd HH:mm:ss}</div>
+        </div>
+    </div>
+</body>
+</html>";
+
+            return html;
+        }
+
     }
 
     public class ChatRequest

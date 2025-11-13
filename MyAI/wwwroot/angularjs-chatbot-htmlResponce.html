@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="chatBotHtmlApp">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AngularJS ChatBot HTML Response</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- AngularJS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .chat-container {
+            height: 600px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: 15%;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .bot-message {
+            background: #ffffff;
+            color: #333;
+            margin-right: 15%;
+            border-bottom-left-radius: 4px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .bot-message h1, .bot-message h2, .bot-message h3 {
+            color: #2d3748;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .bot-message h1 { font-size: 24px; }
+        .bot-message h2 { font-size: 20px; }
+        .bot-message h3 { font-size: 18px; }
+        
+        .bot-message code {
+            background: #2d3748;
+            color: #68d391;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .bot-message pre {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .bot-message pre code {
+            background: transparent;
+            padding: 0;
+        }
+        
+        .bot-message ul, .bot-message ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .bot-message li {
+            margin: 8px 0;
+        }
+        
+        .bot-message strong {
+            color: #4a5568;
+            font-weight: 700;
+        }
+        
+        .bot-message p {
+            margin: 12px 0;
+        }
+        
+        .bot-message blockquote {
+            border-left: 4px solid #cbd5e0;
+            padding-left: 20px;
+            margin: 15px 0;
+            color: #4a5568;
+            font-style: italic;
+        }
+        
+        .bot-message a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .bot-message a:hover {
+            text-decoration: underline;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+        
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.2em;
+        }
+        
+        .timestamp {
+            font-size: 0.75em;
+            color: #6c757d;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+        
+        .error-message {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .input-group .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #653a8f 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body ng-controller="ChatBotHtmlController as vm">
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-10 offset-md-1">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;">
+                        <h3 class="mb-0">
+                            <i class="bi bi-chat-dots"></i> AngularJS ChatBot - HTML Response
+                        </h3>
+                        <small class="text-white-50">Get beautifully formatted HTML responses with inline CSS</small>
+                    </div>
+                    <div class="card-body">
+                        <!-- Chat Messages Container -->
+                        <div class="chat-container" id="chatContainer">
+                            <div ng-if="vm.messages.length === 0" class="text-center text-muted py-5">
+                                <h5>Welcome!</h5>
+                                <p>Ask a question to get a beautifully formatted HTML response.</p>
+                            </div>
+                            
+                            <div ng-repeat="message in vm.messages" 
+                                 class="message {{message.isUser ? 'user-message' : 'bot-message'}}">
+                                <div ng-if="message.isUser">
+                                    <strong>You:</strong>
+                                    <div style="margin-top: 5px;">{{message.content}}</div>
+                                </div>
+                                <div ng-if="!message.isUser">
+                                    <strong>AI:</strong>
+                                    <div ng-bind-html="message.content" style="margin-top: 10px;"></div>
+                                </div>
+                                <div class="timestamp">
+                                    {{message.timestamp | date:'short'}}
+                                </div>
+                            </div>
+                            
+                            <div ng-if="vm.isLoading" class="loading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Generating HTML response...</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Message -->
+                        <div ng-if="vm.error" class="error-message">
+                            <strong>Error:</strong> {{vm.error}}
+                        </div>
+                        
+                        <!-- Input Area -->
+                        <div class="input-group mt-3">
+                            <input type="text" 
+                                   class="form-control" 
+                                   placeholder="Type your question here..." 
+                                   ng-model="vm.inputMessage"
+                                   ng-keypress="vm.handleKeyPress($event)"
+                                   ng-disabled="vm.isLoading">
+                            <button class="btn btn-primary" 
+                                    ng-click="vm.sendHtmlChat()" 
+                                    ng-disabled="vm.isLoading || !vm.inputMessage">
+                                <span ng-if="vm.isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                                <span ng-if="!vm.isLoading">Send</span>
+                                <span ng-if="vm.isLoading">Sending...</span>
+                            </button>
+                            <button class="btn btn-outline-secondary" 
+                                    ng-click="vm.clearChat()" 
+                                    ng-disabled="vm.isLoading">
+                                Clear
+                            </button>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>HTML Response:</strong> Responses are formatted as HTML with inline CSS. 
+                                Code blocks, lists, headers, and other markdown elements are automatically styled.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AngularJS Module Definition -->
+    <script>
+        // Create AngularJS module
+        var app = angular.module('chatBotHtmlApp', []);
+        
+        // Configure $sce to allow trusted HTML
+        app.config(['$sceProvider', function($sceProvider) {
+            $sceProvider.enabled(false); // Allow all HTML (for trusted source)
+        }]);
+    </script>
+    
+    <!-- ChatBot HTML Controller -->
+    <script>
+        app.controller('ChatBotHtmlController', ['$http', '$sce', '$scope', function($http, $sce, $scope) {
+            var vm = this;
+            
+            vm.messages = [];
+            vm.inputMessage = '';
+            vm.isLoading = false;
+            vm.error = null;
+            
+            vm.sendHtmlChat = function() {
+                if (!vm.inputMessage || vm.inputMessage.trim() === '') {
+                    return;
+                }
+                
+                // Add user message
+                vm.messages.push({
+                    isUser: true,
+                    content: vm.inputMessage.trim(),
+                    timestamp: new Date()
+                });
+                
+                var userMessage = vm.inputMessage.trim();
+                vm.inputMessage = '';
+                vm.isLoading = true;
+                vm.error = null;
+                
+                // Scroll to bottom
+                setTimeout(function() {
+                    var container = document.getElementById('chatContainer');
+                    if (container) {
+                        container.scrollTop = container.scrollHeight;
+                    }
+                }, 100);
+                
+                // Call the HTML endpoint
+                $http({
+                    method: 'POST',
+                    url: '/api/ChatBot/html',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    data: {
+                        Message: userMessage
+                    },
+                    responseType: 'text',
+                    transformResponse: function(data) {
+                        // Return the HTML response as-is
+                        return data;
+                    }
+                }).then(function(response) {
+                    // Extract the HTML content from the full HTML document
+                    // The response is a full HTML document, we need to extract just the content
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(response.data, 'text/html');
+                    var answerDiv = doc.querySelector('.answer .content');
+                    var questionDiv = doc.querySelector('.question');
+                    
+                    // Extract just the answer content
+                    var htmlContent = '';
+                    if (answerDiv) {
+                        htmlContent = answerDiv.innerHTML;
+                    } else {
+                        // Fallback: try to extract from body
+                        var bodyContent = doc.querySelector('body');
+                        if (bodyContent) {
+                            htmlContent = bodyContent.innerHTML;
+                        } else {
+                            htmlContent = response.data;
+                        }
+                    }
+                    
+                    // The response is HTML, so we can use it directly
+                    vm.messages.push({
+                        isUser: false,
+                        content: $sce.trustAsHtml(htmlContent),
+                        timestamp: new Date()
+                    });
+                    
+                    vm.isLoading = false;
+                    
+                    // Scroll to bottom after response
+                    setTimeout(function() {
+                        var container = document.getElementById('chatContainer');
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    }, 100);
+                }).catch(function(error) {
+                    var errorMsg = 'An error occurred while getting the response.';
+                    if (error.data) {
+                        if (typeof error.data === 'string') {
+                            errorMsg = error.data;
+                        } else if (error.data.message) {
+                            errorMsg = error.data.message;
+                        }
+                    }
+                    vm.error = errorMsg;
+                    vm.isLoading = false;
+                    
+                    console.error('Error:', error);
+                });
+            };
+            
+            vm.handleKeyPress = function(event) {
+                if (event.keyCode === 13 && !event.shiftKey) {
+                    event.preventDefault();
+                    vm.sendHtmlChat();
+                }
+            };
+            
+            vm.clearChat = function() {
+                vm.messages = [];
+                vm.error = null;
+            };
+        }]);
+    </script>
+    
+    <!-- Auto-scroll to bottom when new messages arrive -->
+    <script>
+        app.run(['$rootScope', function($rootScope) {
+            $rootScope.$watch(function() {
+                return document.querySelectorAll('.message').length;
+            }, function() {
+                var container = document.getElementById('chatContainer');
+                if (container) {
+                    setTimeout(function() {
+                        container.scrollTop = container.scrollHeight;
+                    }, 100);
+                }
+            });
+        }]);
+    </script>
+</body>
+</html>
+
